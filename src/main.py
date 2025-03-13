@@ -1,7 +1,8 @@
 import subprocess
 from time import sleep
+import signal
 
-from tg import handle_event, on_startup
+from tg import handle_event, on_startup, on_shutdown
 
 
 def get_active_apps():
@@ -72,4 +73,5 @@ def main():
 
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGTERM, on_shutdown)
     main()

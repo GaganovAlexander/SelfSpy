@@ -1,6 +1,7 @@
 import urllib.parse
 import urllib.request
 from datetime import datetime
+import sys
 
 from configs import TG_BOT_TOKEN, TG_CHAT_ID
 from storage import load_backlog, save_backlog
@@ -73,4 +74,10 @@ def on_startup():
     message = f"🖥 *Система запущена*\n🕒 *Время:* `{timestamp}`"
     flush_backlog()
     send_to_telegram(message)
-    
+
+def on_shutdown():
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    message = f"🔌 *Система выключается*\n🕒 *Время:* `{timestamp}`"
+    flush_backlog()
+    send_to_telegram(message)
+    sys.exit(0)
