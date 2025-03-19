@@ -7,7 +7,7 @@ from configs import TG_BOT_TOKEN, TG_CHAT_ID
 from storage import load_backlog, save_backlog
 
 
-def send_to_telegram(message):
+def send_to_telegram(message, is_from_flush_backlog=False):
     url = f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage"
     data = urllib.parse.urlencode({
         "chat_id": TG_CHAT_ID,
@@ -20,9 +20,10 @@ def send_to_telegram(message):
             response.read()
         return True
     except:
-        backlog = load_backlog()
-        backlog.append(message)
-        save_backlog(backlog)
+        if not is_from_flush_backlog:
+            backlog = load_backlog()
+            backlog.append(message)
+            save_backlog(backlog)
         return False
 
 def handle_event(event_type, name, url=""):
@@ -64,7 +65,7 @@ def flush_backlog():
     if not backlog:
         return
     for message in backlog:
-        if not send_to_telegram(message):
+        if not send_to_telegram(message, True):
             break
     else:
         save_backlog([])
@@ -75,7 +76,7 @@ def on_startup():
     flush_backlog()
     send_to_telegram(message)
 
-def on_shutdown():
+def on_shutdown(*args, **kwargs):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     message = f"🔌 *Система выключается*\n🕒 *Время:* `{timestamp}`"
     flush_backlog()

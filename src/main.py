@@ -22,8 +22,6 @@ def get_active_tabs(browser):
     return set(result.stdout.strip().split(", "))
 
 def main():
-    on_startup()
-
     previous_apps = set()
 
     chrome = "Google Chrome"
@@ -74,4 +72,5 @@ def main():
 
 if __name__ == "__main__":
     signal.signal(signal.SIGTERM, on_shutdown)
+    on_startup()
     main()
