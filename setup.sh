@@ -1,7 +1,12 @@
 #!/bin/bash
+
 if [ "$EUID" -ne 0 ]; then
   echo "Пожалуйста, запустите скрипт с sudo"
-  exit 1
+  if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    return 1
+  else
+    exit 1
+  fi
 fi
 
 CURRENT_DIR=$(pwd)
@@ -64,7 +69,16 @@ EOF
 sudo chmod 644 "$PLIST_PATH"
 sudo chown root:wheel "$PLIST_PATH"
 
-sudo chown -R root:wheel "$CURRENT_DIR"
+GROUP_NAME="selfspy"
+
+if ! getent group "$GROUP_NAME" >/dev/null; then
+  groupadd "$GROUP_NAME"
+fi
+
+usermod -aG "$GROUP_NAME" "$SUDO_USER"
+usermod -aG "$GROUP_NAME" root
+
+chown -R $SUDO_USER:"$GROUP_NAME" "$CURRENT_DIR"
 
 sudo launchctl load "$PLIST_PATH"
 echo "LaunchDaemon com.althgamer.selfspy загружен."

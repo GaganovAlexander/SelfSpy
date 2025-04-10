@@ -11,8 +11,8 @@
 
 ## Установка
 Перед установкой:
-- Создайте Telegram-бота через BotFather, так как вам понадобится его токен.
-- Узнайте свой Telegram ID с помощью GetMyId — он понадобится в setup.sh.
+- Создайте Telegram-бота через [BotFather](https://t.me/BotFather), так как вам понадобится его токен.
+- Узнайте свой Telegram ID с помощью [GetMyId](https://t.me/getmyid_bot) — он понадобится в setup.sh.
 
 Далее просто запустите команды:
 
