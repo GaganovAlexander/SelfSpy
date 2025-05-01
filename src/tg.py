@@ -4,7 +4,7 @@ from datetime import datetime
 import sys
 
 from configs import TG_BOT_TOKEN, TG_CHAT_ID, state
-from storage import load_backlog, save_backlog, save_cron
+from storage import load_backlog, save_backlog, save_cron, save_apps, save_dmgs
 
 
 def send_to_telegram(message, is_from_flush_backlog=False):
@@ -69,6 +69,25 @@ def handle_event(event_type, *args):
                 f"👤 *Пользователь*: `{args[0]}`\n"
                 f"📝 *Задача*:\n```\n{args[1]}\n```"
             )
+        case "installed":
+            message = (
+                "📦 *Установлено приложение*\n"
+                f"🕒 *Время*: `{timestamp}`\n"
+                f"🖥️ *Приложение*: `{args[0]}`"
+            )
+        case "uninstalled":
+            message = (
+                "🗑️ *Удалено приложение*\n"
+                f"🕒 *Время*: `{timestamp}`\n"
+                f"🖥️ *Приложение*: `{args[0]}`"
+            )
+        case "downloaded_dmg":
+            message = (
+                "📥 *Загружен DMG-файл*\n"
+                f"🕒 *Время*: `{timestamp}`\n"
+                f"📄 *Файл*: `{args[0]}`"
+            )
+
 
     flush_backlog()
     send_to_telegram(message)
@@ -92,6 +111,9 @@ def on_startup():
 
 def on_shutdown(signum, frame):
     save_cron(state["crontasks"])
+    save_apps(list(state["apps"]))
+    save_dmgs(list(state["dmgs"]))
+
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     message = f"🔌 *Система выключается*\n🕒 *Время:* `{timestamp}`"
     flush_backlog()
