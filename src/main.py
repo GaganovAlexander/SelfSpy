@@ -2,7 +2,9 @@ import subprocess
 from time import sleep
 import signal
 
+from storage import load_cron
 from tg import handle_event, on_startup, on_shutdown
+from configs import state
 
 
 def get_active_apps():
@@ -21,6 +23,20 @@ def get_active_tabs(browser):
                     )
     return set(result.stdout.strip().split(", "))
 
+def get_crontabs() -> dict[str, list[str]]:
+    crontabs = subprocess.run(
+                    ["sudo", "ls", "/var/at/tabs"],
+                    capture_output=True, text=True
+                    ).stdout.strip().split()
+    crontasks = {}
+    for tab in crontabs:
+        crontasks[tab] = subprocess.run(
+            ["sudo", "crontab", "-u", tab, "-l"],
+            capture_output=True, text=True
+            ).stdout.strip().split("\n")
+    return crontasks
+        
+current_crontasks = {}
 def main():
     previous_apps = set()
 
@@ -29,6 +45,8 @@ def main():
 
     safari = "Safari"
     previous_safari_urls = set()
+
+    previous_crontasks = load_cron()
 
     while True:
         # Блок с проверкой приложений
@@ -66,6 +84,22 @@ def main():
             for url in closed_safari_urls:
                 handle_event("close_url", safari, url)
         
+
+        # Блок с кронтабами
+        state["crontasks"] = get_crontabs()
+        for tab in set(state["crontasks"].keys()) | set(previous_crontasks.keys()):
+            current_crontasks_set = set(state["crontasks"].get(tab, []))
+            previous_crontasks_set = set(previous_crontasks.get(tab, []))
+
+            new_crontasks = current_crontasks_set - previous_crontasks_set
+            deleted_crontasks = previous_crontasks_set - current_crontasks_set
+
+            for task in new_crontasks:
+                handle_event("new_cron", tab, task)
+            for task in deleted_crontasks:
+                handle_event("deleted_cron", tab, task)
+        previous_crontasks = state["crontasks"]
+
 
         sleep(1)
 

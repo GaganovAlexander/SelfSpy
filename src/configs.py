@@ -8,5 +8,8 @@ load_dotenv(find_dotenv())
 
 BASE_DIR = path.dirname(path.abspath(__file__)) 
 BACKLOG_PATH = Path(path.join(BASE_DIR, "backlog.json"))
+CRON_PATH = Path(path.join(BASE_DIR, "cron.json"))
 TG_BOT_TOKEN = environ.get("TG_BOT_TOKEN")
 TG_CHAT_ID = environ.get("TG_CHAT_ID")
+
+state = {}

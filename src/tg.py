@@ -3,8 +3,8 @@ import urllib.request
 from datetime import datetime
 import sys
 
-from configs import TG_BOT_TOKEN, TG_CHAT_ID
-from storage import load_backlog, save_backlog
+from configs import TG_BOT_TOKEN, TG_CHAT_ID, state
+from storage import load_backlog, save_backlog, save_cron
 
 
 def send_to_telegram(message, is_from_flush_backlog=False):
@@ -26,35 +26,49 @@ def send_to_telegram(message, is_from_flush_backlog=False):
             save_backlog(backlog)
         return False
 
-def handle_event(event_type, name, url=""):
+def handle_event(event_type, *args):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     match event_type:
         case "start":
             message = (
                 "🚀 *Приложение запущено*\n"
                 f"🕒 *Время:* `{timestamp}`\n"
-                f"🔹 *Имя приложения:* `{name}`"
+                f"🔹 *Имя приложения:* `{args[0]}`"
             )
         case "stop":
             message = (
                 "⛔ *Приложение закрыто*\n"
                 f"🕒 *Время:* `{timestamp}`\n"
-                f"🔹 *Имя приложения:* `{name}`"
+                f"🔹 *Имя приложения:* `{args[0]}`"
             )
         case "open_url":
             message = (
                 "🆕 *Новый URL открыт*\n"
                 f"🕒 *Время*: `{timestamp}`\n"
-                f"🌐 *Браузер*: `{name}`\n"
-                f"🔗 *URL*: [{urllib.parse.urlparse(url).netloc}]({url})"
+                f"🌐 *Браузер*: `{args[0]}`\n"
+                f"🔗 *URL*: [{urllib.parse.urlparse(args[1]).netloc}]({args[1]})"
                 )
         case "close_url":
             message = (
                 "❌ *URL закрыт*\n"
                 f"🕒 *Время*: `{timestamp}`\n"
-                f"🌐 *Браузер*: `{name}`\n"
-                f"🔗 *URL*: [{urllib.parse.urlparse(url).netloc}]({url})"
+                f"🌐 *Браузер*: `{args[0]}`\n"
+                f"🔗 *URL*: [{urllib.parse.urlparse(args[1]).netloc}]({args[1]})"
                 )
+        case "new_cron":
+            message = (
+                "➕ *Новая cron-задача*\n"
+                f"🕒 *Время*: `{timestamp}`\n"
+                f"👤 *Пользователь*: `{args[0]}`\n"
+                f"📝 *Задача*:\n```\n{args[1]}\n```"
+            )
+        case "deleted_cron":
+            message = (
+                "➖ *Удалена cron-задача*\n"
+                f"🕒 *Время*: `{timestamp}`\n"
+                f"👤 *Пользователь*: `{args[0]}`\n"
+                f"📝 *Задача*:\n```\n{args[1]}\n```"
+            )
 
     flush_backlog()
     send_to_telegram(message)
@@ -76,7 +90,8 @@ def on_startup():
     flush_backlog()
     send_to_telegram(message)
 
-def on_shutdown(*args, **kwargs):
+def on_shutdown(signum, frame):
+    save_cron(state["crontasks"])
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     message = f"🔌 *Система выключается*\n🕒 *Время:* `{timestamp}`"
     flush_backlog()
