@@ -6,6 +6,9 @@
 - Запуске и завершении работы системы
 - Запуске и завершении работы всех оконных приложений
 - Открытии и закрытии вкладок в Google Chrome и Safari
+- Добавлении и удалении cron задач
+- Установку и удаление приложений
+- Загрузка dmg файлов
 #### Приложение самостоятельно регистрируется как LaunchDaemon
 #### Приложение запускается от root, чтобы видеть активность всех пользователей
 
@@ -49,5 +52,6 @@ sudo rm -rf {path_}
 
 ## Структура приложения
 - [src/](https://github.com/GaganovAlexander/SelfSpy/blob/main/src) - исходный код приложения
+- [src/saved_data/](https://github.com/GaganovAlexander/SelfSpy/blob/main/src/saved_data) - хранилище для данных, сохраняемых между запусками приложения или при отсутствии интернета
 - [LICENSE](https://github.com/GaganovAlexander/SelfSpy/blob/main/LICENSE) - лицензия MIT
 - [setup.sh](https://github.com/GaganovAlexander/SelfSpy/blob/main/setup.sh) - скрипт установки, который создаёт окружение, регистрирует приложение в launchctl и настраивает права доступа  
