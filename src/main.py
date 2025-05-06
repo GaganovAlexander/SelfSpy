@@ -2,6 +2,7 @@ import subprocess
 from os import listdir, path
 from time import sleep
 import signal
+import json
 
 from storage import load_cron, load_apps, load_dmgs
 from tg import handle_event, on_startup, on_shutdown
@@ -40,17 +41,12 @@ def get_applications():
 
 def get_dmgs():
     result = set()
-    for user in listdir("/Users"):
-        downloads_path = f"/Users/{user}/Downloads"
-        if path.isdir(downloads_path):
-            for file in listdir(downloads_path):
-                if file.endswith(".dmg"):
-                    full_path = path.join(downloads_path, file)
-                    result.add(full_path.removesuffix(".dmg"))
+    for user in map(lambda x: x.removesuffix(".json") ,listdir("/var/db/selfspy/dmgs")):
+        with open(f"/var/db/selfspy/dmgs/{user}.json", "r") as f:
+            result = result | set(json.load(f))
     return result
         
 
-current_crontasks = {}
 def main():
     previous_windows= set()
 
@@ -116,6 +112,13 @@ def main():
                 handle_event("deleted_cron", tab, task)
         previous_crontasks = state["crontasks"]
 
+        # Блок с загрузкой .dmg
+        state["dmgs"] = get_dmgs()
+        new_dmgs = state["dmgs"] - previous_dmgs
+
+        for dmg in new_dmgs:
+            handle_event("downloaded_dmg", dmg)
+        previous_dmgs = state["dmgs"]
 
         # Блок с установкой/удалением приложениями
         state["apps"] = get_applications()
@@ -129,13 +132,6 @@ def main():
         previous_apps = state["apps"]
 
 
-        # Блок с загрузкой .dmg
-        state["dmgs"] = get_dmgs()
-        new_dmgs = state["dmgs"] - previous_dmgs
-
-        for dmg in new_dmgs:
-            handle_event("downloaded_dmg", dmg)
-        previous_dmgs = state["dmgs"]
 
         sleep(1)
 

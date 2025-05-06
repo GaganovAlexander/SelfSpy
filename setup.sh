@@ -75,6 +75,21 @@ if ! getent group "$GROUP_NAME" >/dev/null; then
   groupadd "$GROUP_NAME"
 fi
 
+sudo mkdir /var/db/selfspy
+sudo mkdir /var/db/selfspy/dmgs
+chmod -R a+rx "$VENV_PATH/bin" 
+
+for user_home in /Users/*; do
+  username=$(basename "$user_home")
+  downloads_dir="$user_home/Downloads"
+
+  if [ -d "$downloads_dir" ]; then
+    echo "Устанавливаю агент для пользователя: $username"
+    sudo ./setup_agent.sh "$username"
+  fi
+done
+
+
 usermod -aG "$GROUP_NAME" "$SUDO_USER"
 usermod -aG "$GROUP_NAME" root
 
