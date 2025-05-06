@@ -57,5 +57,5 @@ sudo rm -rf {path_}
 - [src/saved_data/](https://github.com/GaganovAlexander/SelfSpy/blob/main/src/saved_data) - хранилище для данных, сохраняемых между запусками приложения или при отсутствии интернета
 - [LICENSE](https://github.com/GaganovAlexander/SelfSpy/blob/main/LICENSE) - лицензия MIT
 - [setup.sh](https://github.com/GaganovAlexander/SelfSpy/blob/main/setup.sh) - скрипт установки, который создаёт окружение, регистрирует приложение в launchctl и настраивает права доступа  
-- [start.sh](https://github.com/GaganovAlexander/SelfSpy/blob/main/start.sh) - скрипт быстрого запуска приложения. Создаётся при запуске setup.sh (Запускать от sudo)
-- [stop.sh](https://github.com/GaganovAlexander/SelfSpy/blob/main/stop.sh) - скрипт быстрой остановки приложения. Создаётся при запуске setup.sh (Запускать от sudo)
+- start.sh - скрипт быстрого запуска приложения. Создаётся при запуске setup.sh (Запускать от sudo)
+- stop.sh - скрипт быстрой остановки приложения. Создаётся при запуске setup.sh (Запускать от sudo)
