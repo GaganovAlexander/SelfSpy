@@ -71,29 +71,65 @@ sudo chown root:wheel "$PLIST_PATH"
 
 GROUP_NAME="selfspy"
 
-if ! getent group "$GROUP_NAME" >/dev/null; then
-  groupadd "$GROUP_NAME"
+if ! dscl . -read /Groups/"$GROUP_NAME" &>/dev/null; then
+  sudo dseditgroup -o create "$GROUP_NAME"
 fi
 
 sudo mkdir /var/db/selfspy
 sudo mkdir /var/db/selfspy/dmgs
 chmod -R a+rx "$VENV_PATH/bin" 
 
+
+AGENT_USERS=()
 for user_home in /Users/*; do
   username=$(basename "$user_home")
   downloads_dir="$user_home/Downloads"
-
   if [ -d "$downloads_dir" ]; then
-    echo "Устанавливаю агент для пользователя: $username"
-    sudo ./setup_agent.sh "$username"
+    AGENT_USERS+=("$username")
   fi
 done
 
+for user in "${AGENT_USERS[@]}"; do
+  username=$(basename "$user_home")
+  downloads_dir="$user_home/Downloads"
+  echo "Устанавливаю агент для пользователя: $username"
+  sudo ./setup_agent.sh "$username"
+done
 
-usermod -aG "$GROUP_NAME" "$SUDO_USER"
-usermod -aG "$GROUP_NAME" root
+
+sudo dseditgroup -o edit -a "$SUDO_USER" -t user "$GROUP_NAME"
+sudo dseditgroup -o edit -a root -t user "$GROUP_NAME"
 
 chown -R $SUDO_USER:"$GROUP_NAME" "$CURRENT_DIR"
 
 sudo launchctl load "$PLIST_PATH"
 echo "LaunchDaemon com.althgamer.selfspy загружен."
+
+
+{
+  echo "#!/bin/bash"
+  for user in "${AGENT_USERS[@]}"; do
+    uid=$(id -u "$user")
+    echo "echo \"Запускаю агент для $user\""
+    echo "launchctl bootstrap gui/$uid \"/Users/$user/Library/LaunchAgents/com.althgamer.selfspy.agent.plist\""
+  done
+  echo ""
+  echo "echo \"Запускаю LaunchDaemon\""
+  echo "sudo launchctl load /Library/LaunchDaemons/com.althgamer.selfspy.plist"
+} | sudo tee ./start.sh > /dev/null
+
+{
+  echo "#!/bin/bash"
+  for user in "${AGENT_USERS[@]}"; do
+    uid=$(id -u "$user")
+    echo "echo \"Останавливаю агент для $user\""
+    echo "launchctl bootout gui/$uid \"/Users/$user/Library/LaunchAgents/com.althgamer.selfspy.agent.plist\""
+  done
+  echo ""
+  echo "echo \"Останавливаю LaunchDaemon\""
+  echo "sudo launchctl unload /Library/LaunchDaemons/com.althgamer.selfspy.plist"
+} | sudo tee ./stop.sh > /dev/null
+
+sudo chmod +x ./start.sh ./stop.sh
+
+echo "Скрипты start.sh и stop.sh успешно созданы."
