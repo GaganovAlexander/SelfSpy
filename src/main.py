@@ -1,5 +1,5 @@
 import subprocess
-from os import listdir, path
+from os import listdir
 from time import sleep
 import signal
 import json

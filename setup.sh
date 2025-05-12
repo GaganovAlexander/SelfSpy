@@ -102,7 +102,7 @@ sudo dseditgroup -o edit -a root -t user "$GROUP_NAME"
 
 chown -R $SUDO_USER:"$GROUP_NAME" "$CURRENT_DIR"
 
-sudo launchctl load "$PLIST_PATH"
+sudo launchctl bootstrap system "$PLIST_PATH"
 echo "LaunchDaemon com.althgamer.selfspy загружен."
 
 
@@ -115,7 +115,7 @@ echo "LaunchDaemon com.althgamer.selfspy загружен."
   done
   echo ""
   echo "echo \"Запускаю LaunchDaemon\""
-  echo "sudo launchctl load /Library/LaunchDaemons/com.althgamer.selfspy.plist"
+  echo "sudo launchctl bootstrap system /Library/LaunchDaemons/com.althgamer.selfspy.plist"
 } | sudo tee ./start.sh > /dev/null
 
 {
@@ -127,7 +127,7 @@ echo "LaunchDaemon com.althgamer.selfspy загружен."
   done
   echo ""
   echo "echo \"Останавливаю LaunchDaemon\""
-  echo "sudo launchctl unload /Library/LaunchDaemons/com.althgamer.selfspy.plist"
+  echo "sudo launchctl bootout system /Library/LaunchDaemons/com.althgamer.selfspy.plist"
 } | sudo tee ./stop.sh > /dev/null
 
 sudo chmod +x ./start.sh ./stop.sh
