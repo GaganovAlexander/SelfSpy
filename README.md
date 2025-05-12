@@ -34,17 +34,16 @@ sudo ./setup.sh
 ## Управление приложением
 Чтобы остановить приложение, используйте команду:
 ```sh
-sudo ./start.sh
+sudo ./stop.sh
 ```
 Чтобы заново(или, если по какой-то причине не запустилось само с запуском системы) запустить:
 ```sh
-sudo launchctl load /Library/LaunchDaemons/com.althgamer.selfspy.plist
+sudo ./start.sh
 ```
 ---
 Для полного удаления приложения:
 ```sh
-sudo launchctl unload /Library/LaunchDaemons/com.althgamer.selfspy.plist
-sudo rm /Library/LaunchDaemons/com.althgamer.selfspy.plist
+sudo ./uninstall.sh
 ```
 Тут заменить "{path_}" на путь до директории "SelfSpy/" включительно
 ```sh
@@ -59,3 +58,4 @@ sudo rm -rf {path_}
 - [setup.sh](https://github.com/GaganovAlexander/SelfSpy/blob/main/setup.sh) - скрипт установки, который создаёт окружение, регистрирует приложение в launchctl и настраивает права доступа  
 - start.sh - скрипт быстрого запуска приложения. Создаётся при запуске setup.sh (Запускать от sudo)
 - stop.sh - скрипт быстрой остановки приложения. Создаётся при запуске setup.sh (Запускать от sudo)
+- uninstall.sh - скрипт для остановки и УДАЛЕНИЯ всех агентов и демона. Создаётся при запуске setup.sh (Запускать от sudo)

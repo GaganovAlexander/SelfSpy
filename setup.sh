@@ -130,6 +130,31 @@ echo "LaunchDaemon com.althgamer.selfspy загружен."
   echo "sudo launchctl bootout system /Library/LaunchDaemons/com.althgamer.selfspy.plist"
 } | sudo tee ./stop.sh > /dev/null
 
-sudo chmod +x ./start.sh ./stop.sh
+{
+  echo "#!/bin/bash"
+  for user in "\${AGENT_USERS[@]}"; do
+    uid=\$(id -u "\$user")
+    plist_path="/Users/\$user/Library/LaunchAgents/com.althgamer.selfspy.agent.plist"
+
+    echo "echo \"Останавливаю агент для \$user\""
+    echo "launchctl bootout gui/\$uid \"\$plist_path\""
+
+    echo "if [ -f \"\$plist_path\" ]; then"
+    echo "  echo \"Удаляю \$plist_path\""
+    echo "  rm \"\$plist_path\""
+    echo "fi"
+  done
+
+  echo ""
+  echo "echo \"Останавливаю LaunchDaemon\""
+  echo "sudo launchctl bootout system /Library/LaunchDaemons/com.althgamer.selfspy.plist"
+
+  echo "if [ -f /Library/LaunchDaemons/com.althgamer.selfspy.plist ]; then"
+  echo "  echo \"Удаляю /Library/LaunchDaemons/com.althgamer.selfspy.plist\""
+  echo "  sudo rm /Library/LaunchDaemons/com.althgamer.selfspy.plist"
+  echo "fi"
+} | sudo tee ./uninstall.sh > /dev/null
+
+sudo chmod +x ./start.sh ./stop.sh ./uninstall.sh
 
 echo "Скрипты start.sh и stop.sh успешно созданы."
